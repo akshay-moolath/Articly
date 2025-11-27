@@ -12,5 +12,37 @@
     <button type="submit">Login</button><br><br>
   </form>
     <button onclick="window.location.href='/register-page'">Register</button>
+    <p id="msg"></p>
+    <script>
+const form = document.getElementById("login-form");
+const msg = document.getElementById("msg");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = {
+        username: form.username.value,
+        password: form.password.value
+    };
+
+    const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+        const result = await res.json();
+
+        localStorage.setItem("username", result.username); //remains logged in  
+
+        window.location.href = "/dashboard";
+    } else {
+        const error = await res.json();
+        msg.textContent = error.detail || "Login failed";
+    }
+});
+</script>
+
  </body>
 </html>

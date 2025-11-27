@@ -8,8 +8,38 @@
 
   <form id="register-form">
     <input name="username" placeholder="Username"><br><br>
+    <input name="email" placeholder="Email"><br><br>
     <input name="password" type="password" placeholder="Password"><br><br>
     <button type="submit">Register</button>
   </form>
+  <p id="msg"></p>
+
+<script>
+const form = document.getElementById("register-form");
+const msg = document.getElementById("msg");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = {
+        username: form.username.value,
+        email: form.email.value,
+        password: form.password.value
+    };
+
+    const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+        window.location.href = "/";
+    } else {
+        const error = await res.json();
+        msg.textContent = error.detail || "Registration failed";
+    }
+});
+</script>
 </body>
 </html>

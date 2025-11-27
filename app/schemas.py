@@ -5,22 +5,27 @@ from datetime import datetime
 #user create schema 
 class UserCreate(BaseModel):
     username: str
+    email: str
     password: str
+    
 #user info schema
 class UserOut(BaseModel):
     id: int
     username: str
+    email: str
 
-    class Config:#read sql object attributes and map to pydantic
+    class Config:
         orm_mode = True
-#need to use after the login,only name is needed       
-class UserMe(BaseModel):
+
+class LoginSchema(BaseModel):
     username: str
+    password: str
 
 #article create,update,view schemas
 class ArticleBase(BaseModel):
     title: str
     content: str
+    author_name: str
 class ArticleCreate(ArticleBase):
     pass
 
@@ -32,7 +37,7 @@ class ArticleOut(BaseModel):
     id: int
     title: str
     content: str
-    author_id: int
+    author_name:str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     class Config:#read sql object attributes and map to pydantic
