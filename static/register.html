@@ -1,44 +1,199 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Register</title>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register — Articly</title>
+  <style>
+    /* VARIABLES: LIGHT Theme colors */
+    :root{
+      --bg: #f8fafc; 
+      --card: #ffffff;
+      --muted: #64748b; 
+      --accent: #1e40af; /* Main Blue Accent */
+      --ok: #059669; /* Success Green */
+      --danger: #b91c1c; /* Danger Red */
+      --text: #0f172a; /* Dark Text Color */
+      --radius:12px;
+      font-family:Inter,system-ui,Arial;
+    }
+    body{
+      margin:0;
+      min-height:100vh;
+      /* Soft gradient background */
+      background: linear-gradient(135deg, var(--bg) 0%, #f1f5f9 100%);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px
+    }
+    .card{
+      width:100%;
+      max-width:400px;
+      /* Enhanced border and shadow for light theme */
+      background: var(--card);
+      border: 1px solid #e2e8f0;
+      border-radius:var(--radius);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
+      padding:28px;
+    }
+    h1{margin:0 0 6px;font-size:24px; color: var(--accent);}
+    p.lead{margin:0 0 20px;color:var(--muted); font-size: 16px;}
+    
+    input{
+      padding:12px;
+      border-radius:8px;
+      background: #f1f5f9; /* Light input background */
+      border:1px solid #e2e8f0;
+      color:var(--text);
+      font-size:16px;
+      outline:none;
+      width:100%;
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
+      background: var(--card);
+    }
+
+    button{
+      border:0;
+      padding:12px 20px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      transition:all 0.2s;
+    }
+    button.primary{
+      background:linear-gradient(90deg,var(--accent),#3b82f6);
+      color:var(--card); /* White text for contrast */
+      box-shadow:0 4px 10px rgba(30, 64, 175, 0.3);
+    }
+    button.primary:hover{transform:translateY(-1px);box-shadow:0 6px 15px rgba(30, 64, 175, 0.4)}
+    
+    button.link{
+      background:transparent;
+      color:var(--muted);
+      padding:0;
+      font-weight:400;
+      text-decoration:underline;
+    }
+    button.link:hover{color:var(--accent)}
+
+    /* Simple text feedback */
+    .msg-feedback{
+      margin-top:20px;
+      font-size:14px;
+      text-align: center;
+      display: none; /* Hidden by default */
+      padding: 8px;
+      border-radius: 6px;
+    }
+    .msg-error{
+      color:var(--danger);
+      background: #ffebeb; /* Very light pink background */
+      border: 1px solid #fecaca;
+    }
+    .msg-success{
+      color:var(--ok);
+      background: #eafff5; /* Very light green background */
+      border: 1px solid #a7f3d0;
+    }
+    .msg-status{
+      color:var(--muted);
+    }
+  </style>
 </head>
 <body>
-  <h2>Register</h2>
+  <div class="card">
+    <h1>Articly</h1>
+    <p class="lead">Create your account</p>
 
-  <form id="register-form">
-    <input name="username" placeholder="Username"><br><br>
-    <input name="email" placeholder="Email"><br><br>
-    <input name="password" type="password" placeholder="Password"><br><br>
-    <button type="submit">Register</button>
-  </form>
-  <p id="msg"></p>
+    <form id="register-form">
+      <div style="margin-bottom:12px">
+        <input name="username" placeholder="Username" required />
+      </div>
+
+      <div style="margin-bottom:12px">
+        <input name="email" type="email" placeholder="Email" required />
+      </div>
+
+      <div style="margin-bottom:12px">
+        <input name="password" type="password" placeholder="Password (min 3 chars)" required />
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center; margin-top: 20px;">
+        <button class="primary" type="submit">Create account</button>
+        <button class="link" type="button" onclick="location.href='/'">Back to login</button>
+      </div>
+
+      <!-- Single, hidden feedback element for all messages -->
+      <div id="feedback-msg" class="msg-feedback" role="status" aria-live="polite"></div>
+    </form>
+  </div>
 
 <script>
-const form = document.getElementById("register-form");
-const msg = document.getElementById("msg");
+const form = document.getElementById('register-form');
+const feedbackMsg = document.getElementById('feedback-msg');
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+function clearMessages() {
+    feedbackMsg.textContent = '';
+    feedbackMsg.style.display = 'none';
+    feedbackMsg.className = 'msg-feedback'; // Reset classes
+}
 
-    const data = {
-        username: form.username.value,
-        email: form.email.value,
-        password: form.password.value
-    };
+function showMessage(type, text) {
+    clearMessages();
+    feedbackMsg.textContent = text;
+    feedbackMsg.style.display = 'block';
+    
+    // Set class based on message type
+    if (type === 'error') {
+        feedbackMsg.classList.add('msg-error');
+    } else if (type === 'success') {
+        feedbackMsg.classList.add('msg-success');
+    } else {
+        feedbackMsg.classList.add('msg-status');
+    }
+}
 
-    const res = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  showMessage('status', 'Registering...');
+
+  const payload = {
+    username: form.username.value.trim(),
+    email: form.email.value.trim(),
+    password: form.password.value
+  };
+
+  try {
+    const res = await fetch('/api/users', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
     });
 
+    // Helper function to safely parse JSON response
+    const body = await (async ()=>{ try{return await res.json()}catch{return null} })();
+
     if (res.ok) {
-        window.location.href = "/";
+      showMessage('success', 'Registration successful! Redirecting to login...');
+      form.reset();
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        window.location.href = '/'; 
+      }, 1500);
     } else {
-        const error = await res.json();
-        msg.textContent = error.detail || "Registration failed";
+      // Display specific error detail or generic fail message
+      showMessage('error', body?.detail || 'Registration failed. Please try again.');
     }
+  } catch(err) {
+    console.error(err);
+    showMessage('error', 'Network error: check server connection.');
+  }
 });
 </script>
 </body>
