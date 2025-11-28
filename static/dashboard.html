@@ -151,6 +151,9 @@
   </div>
 
 <script>
+  if (!localStorage.getItem('access_token')) {
+  window.location.href = '/';
+}
 function getAuthHeaders() {
   const token = localStorage.getItem('access_token');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -381,9 +384,9 @@ const res = await fetch('/api/books', { headers: { ...getAuthHeaders() }});
 listBtn.addEventListener('click', loadbooks);
 refreshBtn.addEventListener('click', loadbooks);
 document.getElementById('logout').addEventListener('click', ()=>{ 
-  localStorage.removeItem('username'); 
-  // Ensure we redirect safely
-  window.location.href = '/'; 
+  localStorage.removeItem('username');
+  localStorage.removeItem('access_token');   // <-- ADD THIS
+  window.location.href = '/';
 });
 
 // helpers
