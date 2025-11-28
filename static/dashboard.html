@@ -151,10 +151,10 @@
   </div>
 
 <script>
-// IMPORTANT: Replaced window.confirm() with a simple modal UI (or console log) 
-// to ensure the app works in the canvas environment, as alert/confirm are disallowed.
-// Also, ensured the XSS-safe 'escapeHtml' function is used where necessary.
-
+function getAuthHeaders() {
+  const token = localStorage.getItem('access_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
 const createForm = document.getElementById('add-book');
 const msg = document.getElementById('msg');
 const successMsg = document.getElementById('success-msg'); // New element
@@ -206,9 +206,15 @@ createForm.addEventListener('submit', async (e)=>{
   };
   
   try {
-    const res = await fetch('/api/books', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
-    });
+    const token = localStorage.getItem('access_token');
+const res = await fetch('/api/books', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    ...getAuthHeaders()
+  },
+  body: JSON.stringify(payload)
+});
     const body = await safeJson(res);
     if (res.ok) {
       showSuccess('Book created successfully! ✔');
@@ -227,7 +233,9 @@ async function loadbooks(){
   booklist.innerHTML = 'Loading...';
   clearMessages();
   try {
-    const res = await fetch('/api/books');
+    const token = localStorage.getItem('access_token');
+const res = await fetch('/api/books', { headers: { ...getAuthHeaders() }});
+
     if (!res.ok) {
       booklist.textContent = 'Failed to load books.';
       showError('Server response error.'); // Use showError
@@ -298,24 +306,37 @@ async function loadbooks(){
     
     // DELETE Handler
     booklist.querySelectorAll('.delete').forEach(btn => {
-      btn.onclick = async (e) => {
-        const id = e.currentTarget.dataset.id;
-        // Using confirm() as per original logic, noting its limitations in the environment
-        if (!window.confirm(`Are you sure you want to delete book ID: ${id}?`)) return;
-        
-        try {
-          const res = await fetch(`/api/books/${id}`, { method:'DELETE' });
-          if (res.ok) {
-            showSuccess(`Book ID ${id} deleted.`);
-            loadbooks();
-          }
-          else {
-            const b = await safeJson(res);
-            showError(b?.detail || 'Delete failed'); // Use showError
-          }
-        } catch (err) { console.error(err); showError('Network error'); } // Use showError
-      };
-    });
+  btn.onclick = async (e) => {
+    const id = e.currentTarget.dataset.id;
+    if (!window.confirm(`Are you sure you want to delete book ID: ${id}?`)) return;
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      showError('Not logged in. Please sign in.');
+      return window.location.href = '/';
+    }
+
+    try {
+      const res = await fetch(`/api/books/${id}`, {
+        method: 'DELETE',
+        headers: {
+          ...getAuthHeaders()
+        }
+      });
+
+      if (res.ok) {
+        showSuccess(`Book ID ${id} deleted.`);
+        loadbooks();
+      } else {
+        const b = await safeJson(res);
+        showError(b?.detail || 'Delete failed');
+      }
+    } catch (err) {
+      console.error(err);
+      showError('Network error');
+    }
+  };
+});
 
     // EDIT Handler
     booklist.querySelectorAll('.edit').forEach(btn => {
@@ -332,9 +353,13 @@ async function loadbooks(){
 
         try {
           const res = await fetch(`/api/books/${id}`, {
-            method:'PUT', headers:{'Content-Type':'application/json'}, 
-            body: JSON.stringify({title,content,author_name:author})
-          });
+  method:'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+    ...getAuthHeaders()
+  },
+  body: JSON.stringify({ title, content, author_name: author })
+});
           const b = await safeJson(res);
           if (res.ok) {
             showSuccess(`Book ID ${id} updated.`);

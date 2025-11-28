@@ -217,6 +217,7 @@ form.addEventListener('submit', async (e) => {
     if (res.ok) {
       // store plain username for UI only
       localStorage.setItem('username', body.username);
+localStorage.setItem('access_token', body.access_token);
       showMessage('success', 'Login successful! Redirecting...');
       
       setTimeout(() => {
