@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard — Articly</title>
+  <title>Dashboard — Booky</title>
   <style>
     /* VARIABLES: LIGHT Theme colors */
     :root{
@@ -112,7 +112,7 @@
 <body>
   <div class="container">
     <header>
-      <div class="brand">Articly Dashboard</div>
+      <div class="brand">Booky Dashboard</div>
       <div style="display:flex;align-items:center;gap:16px">
         <div class="user" id="user-info">Not logged</div>
         <button class="btn-ghost" id="logout">Logout</button>
@@ -121,13 +121,13 @@
 
     <div class="grid">
       <div class="card">
-        <h2>Create a New Article</h2>
-        <form id="create-article">
+        <h2>Add a Book</h2>
+        <form id="add-book">
           <div><input name="title" placeholder="Title" required></div>
           <div><textarea name="content" placeholder="Content" required></textarea></div>
           <div><input name="author_name" placeholder="Author name" required></div>
           <div style="display:flex;gap:12px;align-items:center; margin-top: 20px;">
-            <button class="btn-primary" type="submit">Create Article</button>
+            <button class="btn-primary" type="submit">Add Book</button>
             <button type="button" class="btn-ghost" id="refresh-list">Refresh list</button>
           </div>
         </form>
@@ -139,10 +139,10 @@
       <div>
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center; margin-bottom: 12px;">
-            <h3 style="margin:0">Existing Articles</h3>
+            <h3 style="margin:0">Existing Books</h3>
             <button id="list-btn" class="btn-ghost">List All</button>
           </div>
-          <div id="articles-list" class="list" style="margin-top:12px">Loading...</div>
+          <div id="book-list" class="list" style="margin-top:12px">Loading...</div>
         </div>
       </div>
     </div>
@@ -155,10 +155,10 @@
 // to ensure the app works in the canvas environment, as alert/confirm are disallowed.
 // Also, ensured the XSS-safe 'escapeHtml' function is used where necessary.
 
-const createForm = document.getElementById('create-article');
+const createForm = document.getElementById('add-book');
 const msg = document.getElementById('msg');
 const successMsg = document.getElementById('success-msg'); // New element
-const articlesList = document.getElementById('articles-list');
+const booklist = document.getElementById('book-list');
 const listBtn = document.getElementById('list-btn');
 const refreshBtn = document.getElementById('refresh-list');
 const userInfo = document.getElementById('user-info');
@@ -223,22 +223,22 @@ createForm.addEventListener('submit', async (e)=>{
 });
 
 // load articles
-async function loadArticles(){
-  articlesList.innerHTML = 'Loading...';
+async function loadbooks(){
+  booklist.innerHTML = 'Loading...';
   clearMessages();
   try {
     const res = await fetch('/api/articles');
     if (!res.ok) {
-      articlesList.textContent = 'Failed to load articles.';
+      booklist.textContent = 'Failed to load books.';
       showError('Server response error.'); // Use showError
       return;
     }
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) {
-      articlesList.textContent = 'No articles found. Create one above.';
+      booklist.textContent = 'No books found. Create one above.';
       return;
     }
-    articlesList.innerHTML = '';
+    booklist.innerHTML = '';
     data.forEach(a => {
       const el = document.createElement('div');
       el.className = 'article';
@@ -291,13 +291,13 @@ async function loadArticles(){
       contentDiv.appendChild(contentTextDiv);
       
       el.appendChild(contentDiv);
-      articlesList.appendChild(el);
+      booklist.appendChild(el);
     });
     
     // ATTACH EVENT HANDLERS (Simplified/Updated from prompt() and confirm())
     
     // DELETE Handler
-    articlesList.querySelectorAll('.delete').forEach(btn => {
+    booklist.querySelectorAll('.delete').forEach(btn => {
       btn.onclick = async (e) => {
         const id = e.currentTarget.dataset.id;
         // Using confirm() as per original logic, noting its limitations in the environment
@@ -307,7 +307,7 @@ async function loadArticles(){
           const res = await fetch(`/api/articles/${id}`, { method:'DELETE' });
           if (res.ok) {
             showSuccess(`Article ID ${id} deleted.`);
-            loadArticles();
+            loadbooks();
           }
           else {
             const b = await safeJson(res);
@@ -318,7 +318,7 @@ async function loadArticles(){
     });
 
     // EDIT Handler
-    articlesList.querySelectorAll('.edit').forEach(btn => {
+    booklist.querySelectorAll('.edit').forEach(btn => {
       btn.onclick = async (e) => {
         const id = e.currentTarget.dataset.id;
         
@@ -338,7 +338,7 @@ async function loadArticles(){
           const b = await safeJson(res);
           if (res.ok) {
             showSuccess(`Article ID ${id} updated.`);
-            loadArticles();
+            loadbooks();
           }
           else showError(b?.detail || 'Update failed'); // Use showError
         } catch(err){ console.error(err); showError('Network error'); } // Use showError
@@ -347,14 +347,14 @@ async function loadArticles(){
 
   } catch(err){ 
     console.error(err); 
-    articlesList.textContent='Failed to load articles due to network error.'; 
+    booklist.textContent='Failed to load articles due to network error.'; 
     showError('Network error during article load.'); // Use showError
   }
 }
 
 // wire buttons
-listBtn.addEventListener('click', loadArticles);
-refreshBtn.addEventListener('click', loadArticles);
+listBtn.addEventListener('click', loadbooks);
+refreshBtn.addEventListener('click', loadbooks);
 document.getElementById('logout').addEventListener('click', ()=>{ 
   localStorage.removeItem('username'); 
   // Ensure we redirect safely
@@ -365,7 +365,7 @@ document.getElementById('logout').addEventListener('click', ()=>{
 async function safeJson(res){ try{return await res.json()}catch{return null} }
 
 // load articles list immediately
-loadArticles();
+loadbooks();
 </script>
 </body>
 </html>

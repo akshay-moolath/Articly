@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from app.db import Base
 from typing import Optional
 from datetime import datetime
@@ -22,3 +22,4 @@ class Article(Base):
     author_name = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
