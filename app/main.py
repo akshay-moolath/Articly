@@ -1,8 +1,10 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles#for getting simple html page for login,register and dashboard
 from fastapi.responses import FileResponse
 from app.db import Base, engine
-import app.models 
+from app import models
+from app.auth import get_current_user
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -26,5 +28,5 @@ def register_page():
 
 
 @app.get("/dashboard")
-def dashboard_page():
+def dashboard_page(current_user: models.User = Depends(get_current_user)):
     return FileResponse("static/dashboard.html")
