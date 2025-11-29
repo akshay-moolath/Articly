@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 import jwt
+import os
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
@@ -9,10 +10,9 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app import models
 
-# Secret for JWT — in prod load from env variable
-JWT_SECRET = "super-secret-change-me"
+JWT_SECRET = os.getenv("JWT_SECRET")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 bearer = HTTPBearer()
