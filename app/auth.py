@@ -1,7 +1,7 @@
 # app/auth.py
 from datetime import datetime, timedelta
 from typing import Optional
-import jwt
+from jose import jwt
 import os
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
